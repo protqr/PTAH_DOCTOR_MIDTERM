@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { TYPEPOSTURES, CHOOSEPOSTURES, TYPESTATUS, GENDER } from "../utils/constants.js";
+import {
+  TYPEPOSTURES,
+  CHOOSEPOSTURES,
+  TYPESTATUS,
+  GENDER,
+} from "../utils/constants.js";
 
 const PatientSchema = new mongoose.Schema(
   {
@@ -31,7 +36,7 @@ const PatientSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { collection: "User", timestamps: true }
 );
 
 export default mongoose.model("Patient", PatientSchema);

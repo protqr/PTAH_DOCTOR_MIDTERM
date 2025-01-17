@@ -3,7 +3,6 @@ import Patient from "./Patient";
 import Wrapper from "../wrappers/PatientsContainer";
 import { useAllPatientContext } from "../../pages/AllPatient";
 
-
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
@@ -12,8 +11,10 @@ dayjs.extend(buddhistEra);
 dayjs.locale("th");
 
 const PatientsContainer = () => {
-  const { data, selectedDate } = useAllPatientContext();
+  const { data } = useAllPatientContext();
+  const selectedDate = dayjs(); // กำหนดวันที่ปัจจุบัน
 
+  // ตรวจสอบว่า data ไม่เป็น null หรือ undefined ก่อนที่จะ destructuring
   if (!data) {
     return (
       <Wrapper>
@@ -22,16 +23,25 @@ const PatientsContainer = () => {
     );
   }
 
-  const { allusers: patients, totalPatients, numOfPages } = data;
+  // destructuring allusers ซึ่งเป็น array ของ patients จาก data
+  const { allusers: patients } = data;
 
+  // ตรวจสอบว่า patients มีค่าและมีความยาวมากกว่า 0 ก่อนที่จะแสดงผู้ป่วย
   if (!patients || patients.length === 0) {
     return (
       <Wrapper>
-        <h2>No patients to display...</h2>
+        <br />
+        <br />
+        <h2>ไม่พบข้อมูลผู้ป่วย</h2>
       </Wrapper>
     );
   }
 
+  // คำนวณจำนวนหน้า (pagination)
+  const patientsPerPage = 10; // จำนวนผู้ป่วยที่จะแสดงในแต่ละหน้า
+  const numOfPages = Math.ceil(patients.length / patientsPerPage);
+
+  // หากมีผู้ป่วย ให้แสดงรายการผู้ป่วย
   return (
     <Wrapper>
       <div className="h5">
@@ -39,13 +49,11 @@ const PatientsContainer = () => {
       </div>
       <div className="blah">
         <p>ประจำวันที่ {dayjs(selectedDate).format("D MMMM BBBB")}</p>
-        <b>
-          จำนวนคนไข้ {totalPatients} คน{patients.length > 1}
-        </b>
+        <b>จำนวนคนไข้ {patients.length} คน</b>
       </div>
       <div className="patients">
         {patients.map((patient) => (
-          <Patient key={patient.idPatient} {...patient} />
+          <Patient key={patient._id} {...patient} />
         ))}
       </div>
       {numOfPages > 1 && <PageBtnContainer />}
