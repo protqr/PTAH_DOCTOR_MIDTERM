@@ -35,6 +35,7 @@ const PatientSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    physicalTherapy: { type: Boolean, default: true },
   },
   { collection: "User", timestamps: true }
 );

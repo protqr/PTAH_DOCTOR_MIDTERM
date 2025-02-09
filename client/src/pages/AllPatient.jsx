@@ -50,7 +50,7 @@ const AllPatient = () => {
             <SearchContainer />
             <Wrapper>
                 {/* <DatePick onChange={(date) => setSelectedDate(date)} /> */}
-                <ThaiDatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+                {/* <ThaiDatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} /> */}
                 <button onClick={() => navigate("/dashboard/add-user")}>
                     {/* <b>+</b> เพิ่มผู้ป่วย */}
                 </button>

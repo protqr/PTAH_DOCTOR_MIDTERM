@@ -8,6 +8,9 @@ const Wrapper = styled.section`
     height: var(--nav-height);
     display: flex;
     align-items: center;
+    z-index: 1000; /* ทำให้แน่ใจว่า nav อยู่ด้านบน */
+    position: sticky;
+    top: 0; /* ติดอยู่ที่ด้านบนสุดของ viewport */
   }
   .page {
     min-height: calc(100vh - var(--nav-height));

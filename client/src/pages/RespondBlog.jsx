@@ -66,6 +66,8 @@ const RespondBlog = () => {
       <div className="border p-6 rounded-lg shadow-lg bg-white mb-6">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">{post.title}</h2>
         <p className="text-gray-700 mb-6 text-justify">{post.content}</p>
+       <p className="text-blue-700 mb-6 text-justify"> #{post.tag}</p>
+
         <div className="text-sm text-gray-500">
           โพสต์เมื่อ: {new Date(post.createdAt).toLocaleString()}
         </div>
@@ -80,7 +82,7 @@ const RespondBlog = () => {
                 key={comment._id}
                 className="p-4 border rounded-lg shadow-sm bg-gray-50 hover:bg-gray-100 transition duration-300"
               >
-                <p className="font-medium text-gray-900">{comment.postedBy?.name || "Guest"}</p>
+                <p className="font-medium text-gray-600">ตอบกลับโดย : {comment.postedBy?.name || "user"}</p>
                 <p className="text-gray-700 text-sm mt-2">{comment.text}</p>
                 <p className="text-sm text-gray-500 mt-2">
                   แสดงความคิดเห็นเมื่อ: {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "ไม่ทราบเวลา"}

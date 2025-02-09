@@ -31,6 +31,8 @@ export { default as EvaluatePatient } from "./EvaluatePatient";
 export { default as GraphPosture } from "./GraphPosture";
 export { default as MoodToday } from "./MoodToday";
 export { default as RespondBlog } from "./RespondBlog";
+export { default as AllRankStar } from "./AllRankStar";
+
 
 
 

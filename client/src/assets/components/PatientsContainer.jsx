@@ -48,7 +48,7 @@ const PatientsContainer = () => {
         <p>บันทึกผลการกายภาพบำบัด</p>
       </div>
       <div className="blah">
-        <p>ประจำวันที่ {dayjs(selectedDate).format("D MMMM BBBB")}</p>
+        {/* <p>ประจำวันที่ {dayjs(selectedDate).format("D MMMM BBBB")}</p> */}
         <b>จำนวนคนไข้ {patients.length} คน</b>
       </div>
       <div className="patients">

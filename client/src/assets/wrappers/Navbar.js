@@ -15,6 +15,9 @@ const Wrapper = styled.nav`
     width: 90vw;
     align-items: center;
     justify-content: space-between;
+    z-index: 1000; /* ทำให้แน่ใจว่า nav อยู่ด้านบน */
+    position: sticky;
+    top: 0; /* ติดอยู่ที่ด้านบนสุดของ viewport */
   }
   .toggle-btn {
     background: transparent;

@@ -9,6 +9,7 @@ import { IoMdPersonAdd } from "react-icons/io";
 import { FaWalking } from "react-icons/fa";
 import { AiFillDatabase } from "react-icons/ai";
 import { IoPeopleSharp } from "react-icons/io5";
+import { FaStar } from "react-icons/fa";
 
 
 const links = [
@@ -31,6 +32,11 @@ const links = [
     text: "ผลกายภาพคนไข้",
     path: "all-patient",
     icon: <AiFillDatabase />,
+  },
+  {
+    text: "อันดับดาว",
+    path: "all-rankstar",
+    icon: <FaStar />,
   },
   // {
   //   text: "เพิ่มข้อมูลคนไข้",

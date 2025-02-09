@@ -34,6 +34,7 @@ import {
   MoodToday,
   RespondBlog,
   // AddAdmin,
+  AllRankStar,
 } from "./pages";
 
 import { action as registerAction } from "./pages/Register";
@@ -224,6 +225,10 @@ const router = createBrowserRouter([
           {
             path: "respond-blog",
             element: <RespondBlog />,
+          },
+          {
+            path: "all-rankstar",
+            element: <AllRankStar />,
           },
         ],
       },
