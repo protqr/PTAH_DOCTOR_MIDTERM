@@ -49,6 +49,7 @@ export const validatePatientInput = withValidationErrors([
     .notEmpty()
     .withMessage("โปรดกรอกหมายเลขผู้ป่วยให้ถูกต้อง")
     .custom(async (value) => {
+      console.log(741)
       // Check if idPatient already exists in the database
       const existingPatient = await Patient.findOne({ idPatient: value });
       if (existingPatient) {
@@ -76,9 +77,9 @@ export const validatePatientInput = withValidationErrors([
     .withMessage("โปรดเลือกชื่อประเภทท่ากายภาพบำบัดให้ถูกต้อง"),
   body("userPosts")
     .notEmpty()
-    // .isIn(Object.values(CHOOSEPOSTURES))
-    // .withMessage("โปรดเลือกท่ากายภาพบำบัดให้ถูกต้อง")
-    ,
+  // .isIn(Object.values(CHOOSEPOSTURES))
+  // .withMessage("โปรดเลือกท่ากายภาพบำบัดให้ถูกต้อง")
+  ,
   body("userStatus")
     .notEmpty()
     .isIn(Object.values(TYPESTATUS))
@@ -127,17 +128,16 @@ export const validateDoctorInput = withValidationErrors([
 ]);
 
 
-export const validateIdParam = withValidationErrors([
-  param("_id").custom(async (value, { req }) => {
-    const isValidId = mongoose.Types.ObjectId.isValid(value);
-    if (!isValidId) throw new BadRequestError("invalid MongoDB id");
-    const patient = await Patient.findById(value);
-    if (!patient) throw new NotFoundError(`no patient with id : ${value}`);
-    const isAdmin = req.user.role === "admin";
-    const isOwner = req.user.userId === patient.createdBy.toString();
-    if (!isAdmin && !isOwner)
-      throw new UnauthorizedError("not authorized to access this route");
-  }),
+export const validateIdParam = withValidationErrors([param("_id").custom(async (value, { req }) => {
+  const isValidId = mongoose.Types.ObjectId.isValid(value);
+  if (!isValidId) throw new BadRequestError("invalid MongoDB id");
+  const patient = await Patient.findById(value);
+  if (!patient) throw new NotFoundError(`no patient with id : ${value}`);
+  const isAdmin = req.user.role === "admin";
+  const isOwner = req.user.userId === patient.createdBy.toString();
+  if (!isAdmin && !isOwner)
+    throw new UnauthorizedError("not authorized to access this route");
+}),
 ]);
 
 export const validateIdParam2 = withValidationErrors([

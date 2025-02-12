@@ -1,4 +1,3 @@
-import React from "react";
 import Patient from "./Patient";
 import Wrapper from "../wrappers/PatientsContainer";
 import { useAllPatientContext } from "../../pages/AllPatient";
@@ -12,9 +11,7 @@ dayjs.locale("th");
 
 const PatientsContainer = () => {
   const { data } = useAllPatientContext();
-  const selectedDate = dayjs(); // กำหนดวันที่ปัจจุบัน
 
-  // ตรวจสอบว่า data ไม่เป็น null หรือ undefined ก่อนที่จะ destructuring
   if (!data) {
     return (
       <Wrapper>
@@ -23,10 +20,8 @@ const PatientsContainer = () => {
     );
   }
 
-  // destructuring allusers ซึ่งเป็น array ของ patients จาก data
   const { allusers: patients } = data;
 
-  // ตรวจสอบว่า patients มีค่าและมีความยาวมากกว่า 0 ก่อนที่จะแสดงผู้ป่วย
   if (!patients || patients.length === 0) {
     return (
       <Wrapper>
@@ -37,8 +32,7 @@ const PatientsContainer = () => {
     );
   }
 
-  // คำนวณจำนวนหน้า (pagination)
-  const patientsPerPage = 10; // จำนวนผู้ป่วยที่จะแสดงในแต่ละหน้า
+  const patientsPerPage = 10;
   const numOfPages = Math.ceil(patients.length / patientsPerPage);
 
   // หากมีผู้ป่วย ให้แสดงรายการผู้ป่วย

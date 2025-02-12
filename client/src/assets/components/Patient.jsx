@@ -41,15 +41,12 @@ const Patient = ({
         </div>
       </header>
       <footer>
-        <Link
-          to={`../edit-patient/${_id}`}
-          className="btn edit-btn"
-          style={{
-            display: "block",
-            marginLeft: "auto",
-            marginRight: "auto",
-            textAlign: "center",
-          }}
+        <Link to={`../edit-patient/${_id}`} className="btn edit-btn" style={{
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto",
+          textAlign: "center",
+        }}
         >
           ดูผลกายภาพบำบัด
         </Link>

@@ -18,6 +18,8 @@ import userRouter from './routes/userRouter.js';
 import PostureRouter from './routes/PostureRouter.js';
 import DoctorRouter from './routes/DoctorRouter.js';
 import PostRouter from './routes/PostRouter.js';
+import QuestionsRouter from './routes/QuestionsRouter.js';
+import AnswersRouter from './routes/AnswersRouter.js';
 
 // Middleware
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
@@ -67,6 +69,8 @@ app.use('/api/v1/users', authenticateUser, userRouter);
 app.use('/api/v1/postures', authenticateUser, PostureRouter);
 app.use('/api/v1/doctors', authenticateUser, DoctorRouter);
 app.use('/api/v1/posts', PostRouter);
+app.use('/api/v1/questions', QuestionsRouter);
+app.use('/api/v1/answers', AnswersRouter);
 
 // Handle 404 Routes
 app.use('*', (req, res) => {

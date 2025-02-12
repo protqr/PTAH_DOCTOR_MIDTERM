@@ -8,6 +8,15 @@ export const getCurrentUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: userWithoutPassword });
 };
 
+export const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(StatusCodes.OK).json(users);
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+  }
+};
+
 export const getApplicationStats = async (req, res) => {
   const users = await User.countDocuments();
   const patient = await Patient.countDocuments();
@@ -61,10 +70,7 @@ export const getAllAdmin = async (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const users = await User.find(queryObject)
-    .sort(sortKey)
-    .skip(skip)
-    .limit(limit); // ลบ { createdBy: req.user.userId } เพื่อค้นหาข้อมูลทั้งหมด
+  const users = await User.find(queryObject).sort(sortKey).skip(skip).limit(limit);
   const totalUsers = await User.countDocuments(queryObject);
   const numOfPages = Math.ceil(totalUsers / limit);
   res

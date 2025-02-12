@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from "react";
-import {
-    FormRow,
-    FormRowSelect,
-    FormRowMultiSelect,
-} from "../assets/components";
 import Wrapper from "../assets/wrappers/DashboardFormPage";
-import { useLoaderData, useParams } from "react-router-dom";
-import {
-    TYPEPOSTURES,
-    CHOOSEPOSTURES,
-    TYPESTATUS,
-    GENDER,
-} from "../../../utils/constants";
-import { Form, useNavigate, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import customFetch from "../utils/customFetch";
 import styled from "styled-components";
-import Calendar from "../assets/components/Calendar.jsx";
-import Profile from "../assets/images/profile.png";
 import PatientCalendar from "../assets/components/PatientCalendar.jsx";
-import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 import { PatientCard } from "../assets/components/PatientCard.jsx";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {  redirect } from "react-router-dom";
 
 export const loader = async ({ params }) => {
     try {
@@ -32,7 +19,7 @@ export const loader = async ({ params }) => {
         return data;
     } catch (error) {
         toast.error(error.response.data.msg);
-        return redirect("/dashboard/all-patient");
+        return null;
     }
 };
 
@@ -40,12 +27,6 @@ export const action = async ({ request, params }) => {
     const { _id } = params;
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
-    console.log(data);
-
-    // แปลงค่าที่เลือกจาก FormRowMultiSelect เป็นอาร์เรย์ของสตริง
-    // if (data.userPosts) {
-    //   data.userPosts = data.userPosts.split(',').map((item) => item.trim());
-    // }
 
     try {
         if (!_id) {
@@ -60,71 +41,104 @@ export const action = async ({ request, params }) => {
     }
 };
 
+
 const EditPatient = () => {
-    const { patient } = useLoaderData();
+    const { _id } = useParams();
     const navigate = useNavigate();
-    const isSubmitting = navigate.state === "submitting";
-    const [selectedUserGender, setSelectedUserGender] = useState(
-        patient.userGender || ""
-    );
-    const [selectedUserType, setSelectedUserType] = useState(
-        patient.userType || ""
-    );
-    // const [selectedUserPosts, setSelectedUserPosts] = useState(
-    //   patient.userPosts || []
-    // );
-    const [selectedUserStatus, setSelectedUserStatus] = useState(
-        patient.userStatus || ""
-    );
-    const [postures, setPostures] = useState([]);
 
-    useEffect(() => {
-        const fetchPostures = async () => {
-            try {
-                const { data } = await customFetch.get("/postures");
-                setPostures(data.postures);
-            } catch (error) {
-                toast.error(error?.response?.data?.msg);
-            }
-        };
-        fetchPostures();
-    }, []);
+    const [questions, setQuestions] = useState([]);
+    const [answers, setAnswers] = useState({});
+    const [loading, setLoading] = useState(true);
 
-    const handleUserTypeChange = (event) => {
-        setSelectedUserGender(event.target.value);
-        setSelectedUserType(event.target.value);
-        setSelectedUserStatus(event.target.value);
+    const fetchQuestions = async () => {
+        try {
+            const { data } = await customFetch.get("/questions");
+            setQuestions(data);
+        } catch (error) {
+            toast.error(error?.response?.data?.msg || "เกิดข้อผิดพลาดในการโหลดคำถาม");
+        }
     };
 
-    // const handleUserPostsChange = (selectedOptions) => {
-    //   setSelectedUserPosts(selectedOptions.map((option) => option.value));
-    // };
+    const fetchAnswers = async () => {
+        try {
+            if (!_id) return;
+            const { data } = await customFetch.get(`/answers/${_id}`);
+            setAnswers(data[0] || {}); // กรณีที่ไม่มีคำตอบ
+        } catch (error) {
+            toast.error(error?.response?.data?.msg || "เกิดข้อผิดพลาดในการโหลดคำตอบ");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (_id) {
+            fetchQuestions();
+            fetchAnswers();
+        }
+    }, [_id]);
+
+    // ✅ กรณีโหลดข้อมูลอยู่
+    if (loading) {
+        return <div className="text-center text-lg font-bold text-gray-600">กำลังโหลด...</div>;
+    }
+
+    // ✅ กรณี `_id` ไม่มีค่า
+    if (!_id) {
+        return <div className="text-center text-lg font-bold text-red-500">ไม่พบข้อมูลผู้ป่วย</div>;
+    }
 
     return (
-        <Wrapper>
-            <StyledFormWrapper>
-                <div className="flex flex-col w-full h-full space-y-12 form">
-                    <PatientCard />
-                    <div className="flex justify-center">
-                        <PatientCalendar />
+        <>
+            <Wrapper>
+                <StyledFormWrapper>
+                    <div className="flex flex-col w-full h-full space-y-12 form">
+                        <PatientCard />
+                        <div className="flex justify-center">
+                            <PatientCalendar />
+                        </div>
+                        <div className="flex flex-row space-x-4 text-lg font-bold">
+                            <button
+                                onClick={() => navigate("/dashboard/eval-doctor")}
+                                className="w-full shadow-xl border-2 p-4 rounded-full"
+                            >
+                                ประเมินผู้ป่วย
+                            </button>
+                            <button
+                                onClick={() => navigate("/dashboard/graph-posture")}
+                                className="w-full shadow-xl border-2 p-4 rounded-full"
+                            >
+                                กราฟแสดงการทำกายภาพ
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex flex-row space-x-4 text-lg font-bold">
-                        <button
-                            onClick={() => navigate("/dashboard/eval-doctor")}
-                            className="w-full shadow-xl border-2 p-4 rounded-full"
-                        >
-                            ประเมินผู้ป่วย
-                        </button>
-                        <button
-                            onClick={() => navigate("/dashboard/graph-posture")}
-                            className="w-full shadow-xl border-2 p-4 rounded-full"
-                        >
-                            กราฟแสดงการทำกายภาพ
-                        </button>
-                    </div>
+                </StyledFormWrapper>
+            </Wrapper>
+
+            <div className="my-10"></div>
+
+            <Wrapper>
+                <div className="text-2xl font-bold text-center">
+                    การตอบคำถามก่อนเริ่มกายภาพบำบัดของผู้ป่วย
                 </div>
-            </StyledFormWrapper>
-        </Wrapper>
+                {questions.map((question, index) => {
+                    const answer = answers?.answers?.find(ans =>
+                        question.choice.some(choice => choice._id === ans._id)
+                    );
+
+                    return (
+                        <div key={question._id} className="flex flex-col space-y-4 mt-4 p-4 border rounded-lg">
+                            <div className="text-lg font-semibold">
+                                {index + 1}. {question.name}
+                            </div>
+                            <div className="text-gray-700 text-md font-medium pt-2">
+                                คำตอบ : {answer ? answer.name : "ไม่ได้ตอบ"}
+                            </div>
+                        </div>
+                    );
+                })}
+            </Wrapper>
+        </>
     );
 };
 
@@ -149,159 +163,3 @@ const StyledFormWrapper = styled.div`
 `;
 
 export default EditPatient;
-
-
-
-// import React, { useState, useEffect } from "react";
-// import {
-//     FormRow,
-//     FormRowSelect,
-//     FormRowMultiSelect,
-// } from "../assets/components";
-// import Wrapper from "../assets/wrappers/DashboardFormPage";
-// import { useLoaderData, useParams } from "react-router-dom";
-// import {
-//     TYPEPOSTURES,
-//     CHOOSEPOSTURES,
-//     TYPESTATUS,
-//     GENDER,
-// } from "../../../utils/constants";
-// import { Form, useNavigate, redirect } from "react-router-dom";
-// import { toast } from "react-toastify";
-// import customFetch from "../utils/customFetch";
-// import styled from "styled-components";
-// import Calendar from "../assets/components/Calendar.jsx";
-// import Profile from "../assets/images/profile.png";
-// import PatientCalendar from "../assets/components/PatientCalendar.jsx";
-// import MoodTodayCard from "../assets/components/MoodTodayCard.jsx";
-// import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
-// import { PatientCard } from "../assets/components/PatientCard.jsx";
-
-// export const loader = async ({ params }) => {
-//     try {
-//         const { _id } = params;
-//         if (!_id) {
-//             throw new Error("Invalid ID");
-//         }
-//         const { data } = await customFetch.get(`/allusers/${_id}`);
-//         return data;
-//     } catch (error) {
-//         toast.error(error.response.data.msg);
-//         return redirect("/dashboard/all-patient");
-//     }
-// };
-
-// export const action = async ({ request, params }) => {
-//     const { _id } = params;
-//     const formData = await request.formData();
-//     const data = Object.fromEntries(formData);
-//     console.log(data);
-
-//     // แปลงค่าที่เลือกจาก FormRowMultiSelect เป็นอาร์เรย์ของสตริง
-//     // if (data.userPosts) {
-//     //   data.userPosts = data.userPosts.split(',').map((item) => item.trim());
-//     // }
-
-//     try {
-//         if (!_id) {
-//             throw new Error("Invalid ID");
-//         }
-//         await customFetch.patch(`/allusers/${_id}`, data);
-//         toast.success("แก้ไขข้อมูลคนไข้เรียบร้อยแล้ว");
-//         return redirect("/dashboard/all-patient");
-//     } catch (error) {
-//         toast.error(error?.response?.data?.msg);
-//         return error;
-//     }
-// };
-
-// const EditPatient = () => {
-//     const { patient } = useLoaderData();
-//     const navigate = useNavigate();
-//     const isSubmitting = navigate.state === "submitting";
-//     const [selectedUserGender, setSelectedUserGender] = useState(
-//         patient.userGender || ""
-//     );
-//     const [selectedUserType, setSelectedUserType] = useState(
-//         patient.userType || ""
-//     );
-//     // const [selectedUserPosts, setSelectedUserPosts] = useState(
-//     //   patient.userPosts || []
-//     // );
-//     const [selectedUserStatus, setSelectedUserStatus] = useState(
-//         patient.userStatus || ""
-//     );
-//     const [postures, setPostures] = useState([]);
-
-//     useEffect(() => {
-//         const fetchPostures = async () => {
-//             try {
-//                 const { data } = await customFetch.get("/postures");
-//                 setPostures(data.postures);
-//             } catch (error) {
-//                 toast.error(error?.response?.data?.msg);
-//             }
-//         };
-//         fetchPostures();
-//     }, []);
-
-//     const handleUserTypeChange = (event) => {
-//         setSelectedUserGender(event.target.value);
-//         setSelectedUserType(event.target.value);
-//         setSelectedUserStatus(event.target.value);
-//     };
-
-//     // const handleUserPostsChange = (selectedOptions) => {
-//     //   setSelectedUserPosts(selectedOptions.map((option) => option.value));
-//     // };
-
-//     return (
-//         <Wrapper>
-//             <StyledFormWrapper>
-//                 <div className="flex flex-col w-full h-full space-y-12 form">
-//                     <PatientCard />
-//                     <div className="flex justify-center">
-//                         <MoodTodayCard />
-//                     </div>
-//                     <div className="flex flex-row justify-center item-center space-x-4 text-lg font-bold">
-//                         <button
-//                             onClick={() => navigate("/dashboard/eval-doctor")}
-//                             className="w-80 shadow-xl border-2 p-4 rounded-full"
-//                         >
-//                             สถิติอารมณ์ประจำเดือน
-//                         </button>
-//                         {/* <button
-//                             onClick={() => navigate("/dashboard/graph-posture")}
-//                             className="w-full shadow-xl border-2 p-4 rounded-full"
-//                         >
-//                             กราฟแสดงการทำกายภาพ
-//                         </button> */}
-//                     </div>
-//                 </div>
-//             </StyledFormWrapper>
-//         </Wrapper>
-//     );
-// };
-
-// const StyledFormWrapper = styled.div`
-//     display: flex;
-//     .image-container {
-//         flex: 1;
-//         display: flex;
-//         justify-content: center;
-//         align-items: center;
-//         padding: 1rem;
-//         .patient-image {
-//             max-width: 60%;
-//             max-height: 60%;
-//             border-radius: 10px;
-//         }
-//     }
-//     .form {
-//         flex: 2;
-//         padding: 1rem;
-//     }
-// `;
-
-// export default EditPatient;
-
