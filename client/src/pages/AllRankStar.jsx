@@ -3,9 +3,7 @@ import Wrapper from "../assets/wrappers/SearchContainer";
 import customFetch from "../utils/customFetch.js";
 
 const AllRankStar = () => {
-
   const [rankData, setRankData] = useState([]);
-
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
@@ -14,8 +12,13 @@ const AllRankStar = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await customFetch.get("/users/alluser");
-        setRankData(data.data);
+        const response = await customFetch.get("/users/alluser");
+        // กรองเฉพาะคนที่มี physicalTherapy === true และเรียงลำดับจำนวนดาว
+        const filteredData = response.data
+          .filter(user => user.physicalTherapy === true)
+          .sort((a, b) => b.stars - a.stars); // เรียงจากมากไปน้อย
+
+        setRankData(filteredData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -23,6 +26,7 @@ const AllRankStar = () => {
 
     fetchData();
   }, []);
+
   const currentData = rankData.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
@@ -47,7 +51,7 @@ const AllRankStar = () => {
           </thead>
           <tbody>
             {currentData.map((item, index) => (
-              <tr key={index} className="bg-white border-b">
+              <tr key={item._id} className="bg-white border-b">
                 <td className="px-6 py-4">{index + 1 + (currentPage - 1) * rowsPerPage}</td>
                 <td className="px-6 py-4">{item.name} {item.surname}</td>
                 <td className="px-6 py-4 flex items-center space-x-1 justify-end">

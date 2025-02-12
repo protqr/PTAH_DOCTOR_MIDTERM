@@ -11,6 +11,7 @@ const CalendarCell = ({ day, status, star }) => {
     if (Array.isArray(status) && status.length === 0) return "text-red-500 font-bold";
     if (status === "ทำได้ดี") return "text-green-500 font-bold";
     if (status === "ควรปรับปรุง") return "text-yellow-500 font-bold";
+    if (status === "หมอยังไม่ประเมิน") return "text-blue-500 font-bold";
     return "text-gray-600";
   };
 
@@ -57,17 +58,16 @@ const PatientCalendar = () => {
   ];
 
   const statusData = {
-    1: " ",
+    1: "ทำได้ดี",
     2: "ทำได้ดี",
     3: "ควรปรับปรุง",
-    4: " ",
+    4: "หมอยังไม่ประเมิน",
     5: [],
   };
 
   const starData = {
     1: true,
     2: true,
-    4: true,
   };
 
   const days = [];
