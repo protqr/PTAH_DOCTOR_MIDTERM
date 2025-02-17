@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import {
   HomeLayout,
@@ -31,7 +31,7 @@ import {
   SoftDeleteAdmin,
   EvaluatePatient,
   GraphPosture,
-  MoodToday,
+  // MoodToday,
   RespondBlog,
   // AddAdmin,
   AllRankStar,
@@ -210,7 +210,7 @@ const router = createBrowserRouter([
             element: <SoftDeleteAdmin />,
           },
           {
-            path: "eval-doctor",
+            path: "eval-doctor/:_id/:date",
             element: <EvaluatePatient />,
           },
           {

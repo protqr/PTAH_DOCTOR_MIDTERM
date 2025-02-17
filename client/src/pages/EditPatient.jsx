@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Wrapper from "../assets/wrappers/DashboardFormPage";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,7 +8,7 @@ import PatientCalendar from "../assets/components/PatientCalendar.jsx";
 import { PatientCard } from "../assets/components/PatientCard.jsx";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {  redirect } from "react-router-dom";
+import { redirect } from "react-router-dom";
 
 export const loader = async ({ params }) => {
     try {
@@ -49,6 +50,7 @@ const EditPatient = () => {
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [loading, setLoading] = useState(true);
+    const [calendarData, setCalendarData] = useState([]);
 
     const fetchQuestions = async () => {
         try {
@@ -63,7 +65,18 @@ const EditPatient = () => {
         try {
             if (!_id) return;
             const { data } = await customFetch.get(`/answers/${_id}`);
-            setAnswers(data[0] || {}); // กรณีที่ไม่มีคำตอบ
+            setAnswers(data[0] || {});
+        } catch (error) {
+            toast.error(error?.response?.data?.msg || "เกิดข้อผิดพลาดในการโหลดคำตอบ");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDataCalendar = async () => {
+        try {
+            const { data } = await customFetch.get(`/main/datacalendar/${_id}`);
+            setCalendarData(data);
         } catch (error) {
             toast.error(error?.response?.data?.msg || "เกิดข้อผิดพลาดในการโหลดคำตอบ");
         } finally {
@@ -75,15 +88,14 @@ const EditPatient = () => {
         if (_id) {
             fetchQuestions();
             fetchAnswers();
+            fetchDataCalendar();
         }
     }, [_id]);
 
-    // ✅ กรณีโหลดข้อมูลอยู่
     if (loading) {
         return <div className="text-center text-lg font-bold text-gray-600">กำลังโหลด...</div>;
     }
 
-    // ✅ กรณี `_id` ไม่มีค่า
     if (!_id) {
         return <div className="text-center text-lg font-bold text-red-500">ไม่พบข้อมูลผู้ป่วย</div>;
     }
@@ -93,23 +105,13 @@ const EditPatient = () => {
             <Wrapper>
                 <StyledFormWrapper>
                     <div className="flex flex-col w-full h-full space-y-12 form">
-                        <PatientCard />
+                        <PatientCard userId={_id} />
                         <div className="flex justify-center">
-                            <PatientCalendar />
+                            <PatientCalendar calendarData={calendarData} userId={_id} />
                         </div>
                         <div className="flex flex-row space-x-4 text-lg font-bold">
-                            <button
-                                onClick={() => navigate("/dashboard/eval-doctor")}
-                                className="w-full shadow-xl border-2 p-4 rounded-full"
-                            >
-                                ประเมินผู้ป่วย
-                            </button>
-                            <button
-                                onClick={() => navigate("/dashboard/graph-posture")}
-                                className="w-full shadow-xl border-2 p-4 rounded-full"
-                            >
-                                กราฟแสดงการทำกายภาพ
-                            </button>
+                            {/* <button onClick={() => navigate(`/dashboard/eval-doctor/${_id}/${new Date().toISOString().split("T")[0]}`)} className="w-full shadow-xl border-2 p-4 rounded-full">ประเมินผู้ป่วย</button> */}
+                            <button onClick={() => navigate("/dashboard/graph-posture")} className="w-full shadow-xl border-2 p-4 rounded-full">กราฟแสดงการทำกายภาพ</button>
                         </div>
                     </div>
                 </StyledFormWrapper>
