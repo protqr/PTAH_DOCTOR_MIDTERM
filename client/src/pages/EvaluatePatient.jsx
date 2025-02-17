@@ -111,23 +111,43 @@ const EvaluatePatient = () => {
           <span>
             {dataList.length > 0 &&
               (() => {
-                const totalSeconds = dataList.filter((o) => new Date(o.created_at).toISOString().split("T")[0] === date).reduce((acc, item) => {
-                  if (!item.timeSpent) return acc;
-                  const [hh, mm, ss] = item.timeSpent.split(":").map(Number);
-                  return acc + hh * 3600 + mm * 60 + ss;
-                }, 0);
+                let startTime = 0;
+                let totalTime = 0;
+                const formattedData = [];
 
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
+                dataList
+                  .filter((o) => new Date(o.created_at).toISOString().split("T")[0] === date)
+                  .forEach((item) => {
+                    if (!item.timeSpent) return;
+                    const [hh, mm, ss] = item.timeSpent.split(":").map(Number);
+                    const timeSpentInSeconds = hh * 3600 + mm * 60 + ss;
+
+                    const endTime = startTime + timeSpentInSeconds;
+
+                    formattedData.push({
+                      startTime,
+                      endTime,
+                      timeSpent: timeSpentInSeconds,
+                    });
+
+                    startTime = endTime;
+                    totalTime = endTime;
+                  });
+
+                const hours = Math.floor(totalTime / 3600);
+                const minutes = Math.floor((totalTime % 3600) / 60);
+                const seconds = totalTime % 60;
                 const formattedTime =
                   (hours > 0 ? `${hours.toString().padStart(2, "0")}:` : "") +
                   `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
                 return (
-                  <div className="font-bold mt-2">รวมเวลาที่ใช้: {formattedTime} นาที</div>
+                  <div className="font-bold mt-2">
+                    รวมเวลาที่ใช้: {formattedTime} นาที
+                  </div>
                 );
               })()}
+
           </span>
           <span className="text-green-600">ประเมินโดยผู้ป่วย</span>
         </div>
