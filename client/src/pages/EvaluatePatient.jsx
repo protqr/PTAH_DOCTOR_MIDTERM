@@ -109,23 +109,14 @@ const EvaluatePatient = () => {
 
         <div className="w-full flex flex-row justify-between px-4 font-thin text-gray-600">
           <span>
-            {dataList.length > 3 &&
+            {dataList.length > 0 &&
               (() => {
-                const fourthItem = dataList
-                  .filter((o) => new Date(o.created_at).toISOString().split("T")[0] === date)[3];
-
-                if (!fourthItem || !fourthItem.timeSpent) return null;
-
-                const adjustedSeconds = 29;
-                const formattedTime = `00:${adjustedSeconds.toString().padStart(2, "0")}`;
-
                 return (
                   <div className="font-bold mt-2">
-                    <p>รวมเวลาที่ใช้: {formattedTime} นาที</p>
+                    <p> รวมเวลาที่ใช้: {dataList.filter((o) => new Date(o.created_at).toISOString().split("T")[0] === date)[3].timeSpent} นาที</p>
                   </div>
-                );
+                )
               })()}
-
           </span>
           <span className="text-green-600">ประเมินโดยผู้ป่วย</span>
         </div>
