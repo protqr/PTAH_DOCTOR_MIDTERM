@@ -15,7 +15,7 @@ const AllRankStar = () => {
         const response = await customFetch.get("/users/alluser");
         // กรองเฉพาะคนที่มี physicalTherapy === true และเรียงลำดับจำนวนดาว
         const filteredData = response.data
-          .filter(user => user.physicalTherapy === true)
+          .filter((user) => user.physicalTherapy === true)
           .sort((a, b) => b.stars - a.stars); // เรียงจากมากไปน้อย
 
         setRankData(filteredData);
@@ -42,20 +42,32 @@ const AllRankStar = () => {
     <Wrapper>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm text-left text-gray-700">
-          <thead className="bg-gray-100 text-gray-600 uppercase">
+          <thead className="bg-[#87cefa] text-white uppercase">
             <tr>
-              <th scope="col" className="px-6 py-3">อันดับ</th>
-              <th scope="col" className="px-6 py-3">ชื่อ-นามสกุล</th>
-              <th scope="col" className="px-6 py-3 text-end">จำนวนดาว</th>
+              <th scope="col" className="w-1/3 px-6 py-3 text-center">
+                อันดับ
+              </th>
+              <th scope="col" className="w-1/3 px-6 py-3 text-center">
+                ชื่อ-นามสกุล
+              </th>
+              <th scope="col" className="w-1/3 px-6 py-3 text-center">
+                จำนวนดาว
+              </th>
             </tr>
           </thead>
           <tbody>
             {currentData.map((item, index) => (
               <tr key={item._id} className="bg-white border-b">
-                <td className="px-6 py-4">{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                <td className="px-6 py-4">{item.name} {item.surname}</td>
-                <td className="px-6 py-4 flex items-center space-x-1 justify-end">
-                  <span className="text-yellow-500 font-bold">{item.stars}</span>
+                <td className="w-1/3 px-6 py-4 text-center">
+                  {index + 1 + (currentPage - 1) * rowsPerPage}
+                </td>
+                <td className="w-1/3 px-6 py-4 text-center">
+                  {item.name} {item.surname}
+                </td>
+                <td className="px-6 py-4 flex items-center space-x-1 justify-center">
+                  <span className="text-yellow-500 font-bold">
+                    {item.stars}
+                  </span>
                   <span className="text-yellow-500">⭐</span>
                 </td>
               </tr>
@@ -67,10 +79,11 @@ const AllRankStar = () => {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded ${currentPage === 1
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-[#4cb3f4] text-white hover:bg-primary-800 shadow-lg hover:shadow-xl"
-              }`}
+            className={`px-4 py-2 rounded ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-[#4cb3f4] text-white hover:bg-primary-800 shadow-lg hover:shadow-xl"
+            }`}
           >
             ก่อนหน้า
           </button>
@@ -78,10 +91,11 @@ const AllRankStar = () => {
             <button
               key={index}
               onClick={() => handlePageChange(index + 1)}
-              className={`px-4 py-2 rounded ${currentPage === index + 1
-                ? "bg-[#4cb3f4] text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-primary-800 shadow-lg hover:shadow-xl"
-                }`}
+              className={`px-4 py-2 rounded ${
+                currentPage === index + 1
+                  ? "bg-[#4cb3f4] text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-primary-800 shadow-lg hover:shadow-xl"
+              }`}
             >
               {index + 1}
             </button>
@@ -89,10 +103,11 @@ const AllRankStar = () => {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded ${currentPage === totalPages
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-[#4cb3f4] text-white hover:bg-primary-800 shadow-lg hover:shadow-xl"
-              }`}
+            className={`px-4 py-2 rounded ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-[#4cb3f4] text-white hover:bg-primary-800 shadow-lg hover:shadow-xl"
+            }`}
           >
             ถัดไป
           </button>

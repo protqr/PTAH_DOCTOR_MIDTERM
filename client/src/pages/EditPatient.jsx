@@ -101,46 +101,58 @@ const EditPatient = () => {
     }
 
     return (
-        <>
-            <Wrapper>
-                <StyledFormWrapper>
-                    <div className="flex flex-col w-full h-full space-y-12 form">
-                        <PatientCard userId={_id} />
-                        <div className="flex justify-center">
-                            <PatientCalendar calendarData={calendarData} userId={_id} />
-                        </div>
-                        <div className="flex flex-row space-x-4 text-lg font-bold">
-                            {/* <button onClick={() => navigate(`/dashboard/eval-doctor/${_id}/${new Date().toISOString().split("T")[0]}`)} className="w-full shadow-xl border-2 p-4 rounded-full">ประเมินผู้ป่วย</button> */}
-                            <button onClick={() => navigate("/dashboard/graph-posture")} className="w-full shadow-xl border-2 p-4 rounded-full">กราฟแสดงการทำกายภาพ</button>
-                        </div>
-                    </div>
-                </StyledFormWrapper>
-            </Wrapper>
+      <>
+        <Wrapper>
+          <StyledFormWrapper>
+            <div className="flex flex-col w-full h-full space-y-12 form">
+              <PatientCard userId={_id} />
+              <div className="flex justify-center">
+                <PatientCalendar calendarData={calendarData} userId={_id} />
+              </div>
+              <div className="flex flex-row space-x-4 text-lg font-bold">
+                {/* <button onClick={() => navigate(`/dashboard/eval-doctor/${_id}/${new Date().toISOString().split("T")[0]}`)} className="w-full shadow-xl border-2 p-4 rounded-full">ประเมินผู้ป่วย</button> */}
+                {/* <button
+                  onClick={() => navigate("/dashboard/graph-posture")}
+                  className="w-full shadow-xl border-2 p-4 rounded-full"
+                >
+                  กราฟแสดงการทำกายภาพ
+                </button> */}
+              </div>
+            </div>
+          </StyledFormWrapper>
+        </Wrapper>
 
-            <div className="my-10"></div>
+        <div className="my-10"></div>
 
-            <Wrapper>
-                <div className="text-2xl font-bold text-center">
-                    การตอบคำถามก่อนเริ่มกายภาพบำบัดของผู้ป่วย
+        <Wrapper>
+          <div className="text-2xl font-regular text-center">
+            การตอบคำถามก่อนเริ่มกายภาพบำบัดของผู้ป่วย
+          </div>
+          {questions.map((question, index) => {
+            const answer = answers?.answers?.find((ans) =>
+              question.choice.some((choice) => choice._id === ans._id)
+            );
+
+            const positiveAnswers = ["มาก", "ดีขึ้นมาก", "พร้อมแล้ว"];
+            const isPositive = answer && positiveAnswers.includes(answer.name);
+            const answerColor = isPositive ? "text-green-600" : "text-red-600";
+
+            return (
+              <div
+                key={question._id}
+                className="flex flex-col space-y-4 mt-4 p-4 border rounded-lg"
+              >
+                <div className="text-lg font-regular">
+                  {index + 1}. {question.name}
                 </div>
-                {questions.map((question, index) => {
-                    const answer = answers?.answers?.find(ans =>
-                        question.choice.some(choice => choice._id === ans._id)
-                    );
-
-                    return (
-                        <div key={question._id} className="flex flex-col space-y-4 mt-4 p-4 border rounded-lg">
-                            <div className="text-lg font-semibold">
-                                {index + 1}. {question.name}
-                            </div>
-                            <div className="text-gray-700 text-md font-medium pt-2">
-                                คำตอบ : {answer ? answer.name : "ไม่ได้ตอบ"}
-                            </div>
-                        </div>
-                    );
-                })}
-            </Wrapper>
-        </>
+                <div className={`text-md font-medium pt-2 ${answerColor}`}>
+                  คำตอบ : {answer ? answer.name : "ไม่ได้ตอบ"}
+                </div>
+              </div>
+            );
+          })}
+        </Wrapper>
+      </>
     );
 };
 

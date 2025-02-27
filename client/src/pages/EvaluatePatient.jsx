@@ -20,7 +20,7 @@ const formatThaiDate = (dateString) => {
 const PostureCard = ({ name, answers, suggestion }) => {
   return (
     <div className="p-4 border-b">
-      <h2 className="font-bold text-lg">{name || "-"}</h2>
+      {/* <h2 className="font-bold text-lg">{name || "-"}</h2> */}
 
       {Array.isArray(answers) && answers.length > 0 ? (
         <ul>
