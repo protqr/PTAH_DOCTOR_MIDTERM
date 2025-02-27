@@ -76,7 +76,7 @@ const BlogManage = () => {
             </p>
 
             <div className="text-sm text-gray-500 mb-2 flex items-center">
-              <span className="font-semibold">{post.postedBy}</span>
+            <span className="font-semibold">{post.postedBy?.name}</span>
             </div>
           </div>
         ))
