@@ -162,14 +162,16 @@ const EvaluatePatient = () => {
 
         {feedbackData ? (
           <div>
-            <p className="font-bold">ตอบกลับผู้ป่วย:</p>
-            <p className="my-2">
-              {feedbackData.doctor_response?.trim()
-                ? feedbackData.doctor_response
-                : "ไม่มีข้อความตอบกลับ"}
+            <p className="font-regular">
+              ตอบกลับผู้ป่วย :
+              <span className="ml-2 my-2">
+                {feedbackData.doctor_response?.trim()
+                  ? feedbackData.doctor_response
+                  : "ไม่มีข้อความตอบกลับ"}
+              </span>
             </p>
-            <p className="font-bold mt-5">
-              ผลการประเมิน:
+            <p className="font-regular mt-5">
+              ผลการประเมิน :
               <span
                 className={`ml-2 ${
                   feedbackData.feedback_type === "ทำได้ดี"
@@ -181,7 +183,8 @@ const EvaluatePatient = () => {
                   ? feedbackData.feedback_type
                   : "ไม่มีผลการประเมิน"}
               </span>
-            </p>
+            </p>{" "}
+            <p className="font-regular mt-5">ประเมินโดย :</p>
           </div>
         ) : (
           <>
