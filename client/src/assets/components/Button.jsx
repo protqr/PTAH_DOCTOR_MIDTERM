@@ -25,23 +25,21 @@ export const LikeButton = ({ isDisable = false, isActive, handleClick }) => {
 
 export const DislikeButton = ({ isDisable = false, isActive, handleClick }) => {
     return (
-        <button
-            className={`w-full flex justify-center items-center p-2 rounded-3xl space-x-2 ${
-                isActive
-                    ? "bg-[#F2AA3D]"
-                    : "bg-[#FBF0DA] border-2 border-[#F2AA3D]"
-            } ${isDisable ? "cursor-not-allowed" : ""}`}
-            onClick={handleClick}
-            disabled={isDisable}
-        >
-            <span className="text-2xl">
-                <AiFillDislike
-                    className={`${isActive ? "text-white" : "text-[#F4AE46]"}`}
-                />
-            </span>
-            <span className={`${isActive ? "text-white" : "text-[#F4AE46]"}`}>
-                ควรปรับปรุง
-            </span>
-        </button>
+      <button
+        className={`w-full flex justify-center items-center p-2 rounded-3xl space-x-2 ${
+          isActive ? "bg-[#F2AA3D]" : "bg-[#FBF0DA] border-2 border-[#F2AA3D]"
+        } ${isDisable ? "cursor-not-allowed" : ""}`}
+        onClick={handleClick}
+        disabled={isDisable}
+      >
+        <span className="text-2xl">
+          <AiFillDislike
+            className={`${isActive ? "text-white" : "text-[#F4AE46]"}`}
+          />
+        </span>
+        <span className={`${isActive ? "text-white" : "text-[#ff9d0a]"}`}>
+          ควรปรับปรุง
+        </span>
+      </button>
     );
 };

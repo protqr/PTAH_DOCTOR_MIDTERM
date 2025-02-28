@@ -10,17 +10,7 @@ export { default as SearchContainer } from "./SearchContainer";
 export { default as StatItem } from "./StatItem";
 export { default as ChartsContainer } from "./ChartsContainer";
 export { default as StatsContainer } from "./StatsContainer";
-export { default as PostureContainer } from "./PostureContainer";
 export { default as SubmitBtn } from "./SubmitBtn";
-export { default as SearchPostures } from "./SearchPostures";
-export { default as SearchDoctors } from "./SearchDoctors";
-export { default as SearchAdmin } from "./SearchAdmin";
-export { default as DeletePosture } from "./DeletePosture";
-export { default as DeletedPatient } from "./DeletedPatient";
-export { default as DeletedDoctor } from "./DeletedDoctor";
-export { default as DeletedAdmin } from "./DeletedAdmin";
-// export { default as DatePick } from "./DatePick";
-
 
 
 

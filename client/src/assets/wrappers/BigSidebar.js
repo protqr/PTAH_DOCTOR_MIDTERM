@@ -26,6 +26,9 @@ const Wrapper = styled.aside`
       align-items: center;
       padding-left: 2.5rem;
     }
+    /* .logo-component {
+      padding-left: -10rem;
+    } */
     .nav-links {
       padding-top: 2rem;
       display: flex;

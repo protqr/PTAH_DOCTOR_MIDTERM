@@ -125,7 +125,7 @@ const EditPatient = () => {
         <div className="my-10"></div>
 
         <Wrapper>
-          <div className="text-2xl font-regular text-center">
+          <div className="text-xl font-regular text-center">
             การตอบคำถามก่อนเริ่มกายภาพบำบัดของผู้ป่วย
           </div>
           {questions.map((question, index) => {
@@ -142,7 +142,7 @@ const EditPatient = () => {
                 key={question._id}
                 className="flex flex-col space-y-4 mt-4 p-4 border rounded-lg"
               >
-                <div className="text-lg font-regular">
+                <div className="text-md font-regular">
                   {index + 1}. {question.name}
                 </div>
                 <div className={`text-md font-medium pt-2 ${answerColor}`}>

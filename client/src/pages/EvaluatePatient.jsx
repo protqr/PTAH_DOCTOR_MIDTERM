@@ -49,6 +49,7 @@ const EvaluatePatient = () => {
   const [response, setResponse] = useState("");
   const [feedback, setFeedback] = useState("");
   const [feedbackData, setFeedbackData] = useState(null);
+  
 
 
 
@@ -111,8 +112,9 @@ const EvaluatePatient = () => {
           <span>
             {dataList.length > 3 &&
               (() => {
-                const filteredList = dataList.filter((o) =>
-                  new Date(o.created_at).toISOString().split("T")[0] === date
+                const filteredList = dataList.filter(
+                  (o) =>
+                    new Date(o.created_at).toISOString().split("T")[0] === date
                 );
 
                 if (filteredList.length < 4) return null;
@@ -124,11 +126,13 @@ const EvaluatePatient = () => {
 
                 return (
                   <div className="font-bold mt-2">
-                    <p>รวมเวลาที่ใช้: <span className="font-bold">{formattedTime}</span> นาที</p>
+                    <p>
+                      รวมเวลาที่ใช้:{" "}
+                      <span className="font-bold">{formattedTime}</span> นาที
+                    </p>
                   </div>
                 );
               })()}
-
           </span>
           <span className="text-green-600">ประเมินโดยผู้ป่วย</span>
         </div>
@@ -136,13 +140,19 @@ const EvaluatePatient = () => {
         <div className="w-full h-full flex flex-col border-2 p-8 rounded-lg space-y-8 shadow-lg">
           {dataList && Array.isArray(dataList) && dataList.length > 0 ? (
             dataList
-              .filter((o) => o.created_at && new Date(o.created_at).toISOString().split("T")[0] === date)
+              .filter(
+                (o) =>
+                  o.created_at &&
+                  new Date(o.created_at).toISOString().split("T")[0] === date
+              )
               .map((val, index) => (
                 <PostureCard
                   key={index}
                   name={val.name || "-"}
                   answers={Array.isArray(val.answers) ? val.answers : []}
-                  suggestion={val.suggestion?.trim() ? val.suggestion : "ไม่มีข้อความ"}
+                  suggestion={
+                    val.suggestion?.trim() ? val.suggestion : "ไม่มีข้อความ"
+                  }
                 />
               ))
           ) : (
@@ -153,10 +163,23 @@ const EvaluatePatient = () => {
         {feedbackData ? (
           <div>
             <p className="font-bold">ตอบกลับผู้ป่วย:</p>
-            <p className="my-2">{feedbackData.doctor_response?.trim() ? feedbackData.doctor_response : "ไม่มีข้อความตอบกลับ"}</p>
-            <p className="font-bold mt-5">ผลการประเมิน:
-              <span className={`ml-2 ${feedbackData.feedback_type === "ทำได้ดี" ? "text-green-600" : "text-orange-500"}`}>
-                {feedbackData.feedback_type?.trim() ? feedbackData.feedback_type : "ไม่มีผลการประเมิน"}
+            <p className="my-2">
+              {feedbackData.doctor_response?.trim()
+                ? feedbackData.doctor_response
+                : "ไม่มีข้อความตอบกลับ"}
+            </p>
+            <p className="font-bold mt-5">
+              ผลการประเมิน:
+              <span
+                className={`ml-2 ${
+                  feedbackData.feedback_type === "ทำได้ดี"
+                    ? "text-[#1DD047]"
+                    : "text-[#ff9d0a]"
+                }`}
+              >
+                {feedbackData.feedback_type?.trim()
+                  ? feedbackData.feedback_type
+                  : "ไม่มีผลการประเมิน"}
               </span>
             </p>
           </div>
