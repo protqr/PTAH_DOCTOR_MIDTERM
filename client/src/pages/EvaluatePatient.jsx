@@ -27,7 +27,15 @@ const PostureCard = ({ name, answers, suggestion }) => {
           {answers.map((answer, i) => (
             <li key={i} className="flex justify-between mb-7">
               <span>{answer.name || "ไม่มีข้อมูล"}</span>
-              <span className={`${answer.result === "ง่าย" ? "text-green-500" : answer.result === "ปานกลาง" ? "text-yellow-500" : "text-red-500"}`}>
+              <span
+                className={`${
+                  answer.result === "ง่าย"
+                    ? "text-green-500"
+                    : answer.result === "ปานกลาง"
+                    ? "text-yellow-500"
+                    : "text-red-500"
+                }`}
+              >
                 {answer.result || "ไม่มีผลลัพธ์"}
               </span>
             </li>
@@ -37,21 +45,23 @@ const PostureCard = ({ name, answers, suggestion }) => {
         <p className="text-gray-400">ไม่มีข้อมูลการตอบ</p>
       )}
 
-      <p className="font-bold mt-2">ข้อความจากผู้ป่วย: {suggestion?.trim() ? suggestion : "ไม่มีข้อความ"}</p>
+      <p className="font-bold mt-2">
+        ข้อความจากผู้ป่วย: {suggestion?.trim() ? suggestion : "ไม่มีข้อความ"}
+      </p>
     </div>
   );
 };
 const EvaluatePatient = () => {
   const { date, _id } = useParams();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(date || new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    date || new Date().toISOString().split("T")[0]
+  );
   const [dataList, setDataList] = useState([]);
   const [response, setResponse] = useState("");
   const [feedback, setFeedback] = useState("");
   const [feedbackData, setFeedbackData] = useState(null);
-  
-
-
+  const userData = JSON.parse(localStorage.getItem("userData"));
 
   const handleBack = () => navigate(-1);
 
@@ -67,8 +77,11 @@ const EvaluatePatient = () => {
 
   const sendDataFeedback = async () => {
     try {
-      const response = await customFetch.post("/feedbacks/getfeedbackbydateandid", { id: _id, date });
-
+      const response = await customFetch.post(
+        "/feedbacks/getfeedbackbydateandid",
+        { id: _id, date }
+      );
+      console.log("Feedback data: ", response);
       if (Array.isArray(response.data) && response.data.length > 0) {
         setFeedbackData(response.data[0]);
       } else {
@@ -92,6 +105,7 @@ const EvaluatePatient = () => {
         doctor_response: response,
         feedback_type: feedback,
         evaluation_date: date,
+        doctor_id: userData.doctor_id,
       };
 
       await customFetch.post("/feedbacks/save", payload);
@@ -184,7 +198,12 @@ const EvaluatePatient = () => {
                   : "ไม่มีผลการประเมิน"}
               </span>
             </p>{" "}
-            <p className="font-regular mt-5">ประเมินโดย :</p>
+            <p className="font-regular mt-5">
+              ประเมินโดย :{" "}
+              {feedbackData.doctor_details
+                ? feedbackData.doctor_details
+                : "ไม่มีผลการประเมิน"}
+            </p>
           </div>
         ) : (
           <>

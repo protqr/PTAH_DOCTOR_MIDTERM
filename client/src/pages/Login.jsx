@@ -29,7 +29,18 @@ export const action = async ({ request }) => {
   //   return errors;
   // }
   try {
-    await customFetch.post("/auth/login", data);
+    const response = await customFetch.post("/auth/login", data);
+    console.log("Response:", response);
+
+    const userData = {
+      msg: "เข้าสู่ระบบสำเร็จ",
+      doctor_id: response.data._id,
+    };
+
+    localStorage.setItem("userData", JSON.stringify(userData));
+    // console.log("User data:");
+    // console.log("Doctor ID:", userData.doctor_id);
+
     console.log("Login successful");
     toast.success("เข้าสู่ระบบเรียบร้อยแล้ว");
     return redirect("/dashboard");
@@ -39,7 +50,6 @@ export const action = async ({ request }) => {
     toast.error(errors.msg);
     return errors;
   }
-
 };
 
 const Login = () => {

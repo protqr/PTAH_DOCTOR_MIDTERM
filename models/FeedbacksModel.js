@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { flushSync } from "react-dom";
 
 const feedbackSchema = new mongoose.Schema(
   {
@@ -10,10 +11,11 @@ const feedbackSchema = new mongoose.Schema(
       required: true,
     },
     evaluation_date: { type: String, required: true },
+    doctor_id: { type: mongoose.Types.ObjectId, required: false }, // เพิ่ม Doctor เข้าไป
     createdBy: {
-          type: mongoose.Types.ObjectId,
-          ref: "User",
-        },
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+    },
   },
   { versionKey: false, collection: "feedback", timestamps: true }
 );

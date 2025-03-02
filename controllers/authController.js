@@ -24,7 +24,6 @@ export const register = async (req, res) => {
 //   // const token = createJWT({ doctorId: doctor._id, role: doctor.role });
 //   const token = createJWT({ doctorId: doctor._id, role: doctor.nametitle });
 
-
 //   const oneDay = 1000 * 60 * 60 * 24;
 
 //   res.cookie("token", token, {
@@ -58,9 +57,14 @@ export const login = async (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  res.status(StatusCodes.OK).json({ msg: "เข้าสู่ระบบสำเร็จ" });
-};
+  console.log("Doctor details:", doctor);
+  res.status(StatusCodes.OK).json({
+    msg: "เข้าสู่ระบบสำเร็จ",
+    _id: doctor._id, // เพิ่ม ID
+  });
 
+  // res.status(StatusCodes.OK).json({ msg: "เข้าสู่ระบบสำเร็จ" });
+};
 
 export const logout = (req, res) => {
   res.cookie("token", "logout", {
