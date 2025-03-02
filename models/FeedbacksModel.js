@@ -14,7 +14,7 @@ const feedbackSchema = new mongoose.Schema(
     doctor_id: { type: mongoose.Types.ObjectId, required: false }, // เพิ่ม Doctor เข้าไป
     createdBy: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      ref: "Doctor",
     },
   },
   { versionKey: false, collection: "feedback", timestamps: true }
