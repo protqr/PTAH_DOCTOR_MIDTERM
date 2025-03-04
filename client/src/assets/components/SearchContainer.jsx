@@ -41,8 +41,13 @@ const SearchContainer = () => {
           <FormRowSelect
             labelText="สถานะของผู้ป่วย"
             name="userStatus"
-            list={["ทั้งหมด", ...Object.values(TYPESTATUS)]}
-            defaultValue={userStatus}
+            list={[
+              "คนไข้ทั้งหมด",
+              "คนไข้ที่ขาดการทำกายภาพบำบัด",
+              "คนไข้ที่ยังไม่ได้ประเมินวันนี้",
+            ]}
+            // list={["ทั้งหมด", ...Object.values(TYPESTATUS)]}
+            // defaultValue={userStatus}
             onChange={(e) => {
               submit(e.currentTarget.form);
             }}
@@ -59,7 +64,7 @@ const SearchContainer = () => {
           /> */}
 
           <FormRowSelect
-            name="sort"
+            name="เรียงลำดับ"
             defaultValue={sort}
             list={[...Object.values(POSTURES_SORT_BY)]}
             onChange={(e) => {

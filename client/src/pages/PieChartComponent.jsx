@@ -13,8 +13,8 @@ const PieChartComponent = ({ assessedCount, notAssessedCount }) => {
           // Reverse the order of data
           data: [notAssessedCount, assessedCount],
           // Reverse the order of colors
-          backgroundColor: ["#f8ba51", "#72DA95"],
-          borderColor: ["#f8ba51", "#72DA95"],
+          backgroundColor: ["#87CEFA", "#72DA95"],
+          borderColor: ["#1686cc", "#35b15e"],
           borderWidth: 1,
         },
       ],

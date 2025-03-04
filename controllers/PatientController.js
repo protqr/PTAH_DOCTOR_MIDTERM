@@ -25,7 +25,7 @@ export const getAllPatients = async (req, res) => {
     ];
   }
 
-  if (userStatus && userStatus !== "ทั้งหมด") {
+  if (userStatus && userStatus !== "คนไข้ทั้งหมด") {
     queryObject.userStatus = userStatus;
   }
 
