@@ -11,6 +11,8 @@ const RespondBlog = () => {
   const { post } = location.state || {};
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [newReply, setNewReply] = useState(""); // state for new replies
+  const [replyTo, setReplyTo] = useState(null); // track which comment you're replying to
 
   if (!post) {
     return <p>ไม่พบข้อมูลกระทู้</p>;
@@ -22,13 +24,11 @@ const RespondBlog = () => {
         const { data } = await axios.get(`/api/v1/posts/${post._id}`);
         setComments(data.post.comments || []);
       } catch (error) {
-        console.error(error);
         toast.error("ไม่สามารถโหลดความคิดเห็นได้");
       }
     };
 
     fetchComments();
-
     socket.on("new-comment", (updatedComments) => {
       setComments(updatedComments);
     });
@@ -38,9 +38,8 @@ const RespondBlog = () => {
     };
   }, [post._id]);
 
-  const handleSubmit = async (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-
     if (!newComment.trim()) {
       toast.error("กรุณาใส่ความคิดเห็น");
       return;
@@ -51,42 +50,101 @@ const RespondBlog = () => {
         comment: newComment,
       });
       if (data.success) {
-        setNewComment("");
+        setNewComment("");  // รีเซ็ตฟอร์ม
         toast.success("เพิ่มความคิดเห็นสำเร็จ");
+        setComments(data.post.comments);
         socket.emit("comment", data.post.comments);
       }
     } catch (error) {
-      console.error(error);
       toast.error("เกิดข้อผิดพลาดในการเพิ่มความคิดเห็น");
     }
   };
+
+  const handleReplySubmit = async (e, commentId) => {
+    e.preventDefault();
+    if (!newReply.trim()) {
+      toast.error("กรุณาใส่คำตอบ");
+      return;
+    }
+  
+    try {
+      const { data } = await axios.put(
+        `/api/v1/posts/comment/reply/${post._id}/${commentId}`,
+        {
+          replyText: newReply,  // ส่ง replyText แทน reply
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`  // ส่ง token ใน headers สำหรับการตรวจสอบการเข้าสู่ระบบ
+          }
+        }
+      );
+      if (data.success) {
+        setNewReply("");  // รีเซ็ตฟอร์มคำตอบ
+        setReplyTo(null); // ปิดการตอบกลับ
+        toast.success("ตอบกลับความคิดเห็นสำเร็จ");
+        setComments(data.post.comments);
+        socket.emit("reply", data.post.comments);
+      }
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการตอบกลับความคิดเห็น");
+    }
+  };
+  
 
   return (
     <div className="max-w-4xl mx-auto my-8">
       <div className="border p-6 rounded-lg shadow-lg bg-white mb-6">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">{post.title}</h2>
         <p className="text-gray-700 mb-6 text-justify">{post.content}</p>
-       <p className="text-blue-700 mb-6 text-justify"> #{post.tag}</p>
-
-        <div className="text-sm text-gray-500">
-          โพสต์เมื่อ: {new Date(post.createdAt).toLocaleString()}
+        <p className="text-blue-700 mb-6">#{post.tag}</p>
+        <div className="text-sm text-gray-500 mb-2 flex items-center">
+          <span className="font-semibold">สร้างโดย : {post.postedBy?.name || "ผู้โพสต์ไม่ทราบ"}</span>
         </div>
       </div>
 
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800">ความคิดเห็นทั้งหมด:</h3>
+        <h3 className="text-xl font-semibold mb-4">ความคิดเห็นทั้งหมด:</h3>
         {comments.length > 0 ? (
           <div className="space-y-4">
             {comments.map((comment) => (
-              <div
-                key={comment._id}
-                className="p-4 border rounded-lg shadow-sm bg-gray-50 hover:bg-gray-100 transition duration-300"
-              >
-                <p className="font-medium text-gray-600">ตอบกลับโดย : {comment.postedBy?.name || "user"}</p>
-                <p className="text-gray-700 text-sm mt-2">{comment.text}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  แสดงความคิดเห็นเมื่อ: {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "ไม่ทราบเวลา"}
-                </p>
+              <div key={comment._id} className="p-4 border rounded-lg bg-gray-50">
+                <p className="font-medium text-gray-600">ตอบกลับโดย: {comment.postedByUser?.name || comment.postedByPersonnel?.name || "ผู้ใช้"}</p>
+                <p className="text-gray-700 mt-2">{comment.text}</p>
+
+                {/* แสดงฟอร์มการตอบกลับ */}
+                <div className="mt-4">
+                  {replyTo === comment._id ? (
+                    <form onSubmit={(e) => handleReplySubmit(e, comment._id)}>
+                      <textarea
+                        className="w-full p-3 border rounded-lg"
+                        placeholder="พิมพ์คำตอบ..."
+                        value={newReply}
+                        onChange={(e) => setNewReply(e.target.value)}
+                      />
+                      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2">ส่งคำตอบ</button>
+                    </form>
+                  ) : (
+                    <button
+                      className="text-blue-500 text-sm"
+                      onClick={() => setReplyTo(comment._id)}
+                    >
+                      ตอบกลับ
+                    </button>
+                  )}
+                </div>
+
+                {/* แสดงคำตอบของความคิดเห็น */}
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="mt-4 ml-6 border-l-2 pl-4">
+                    {comment.replies.map((reply) => (
+                      <div key={reply._id} className="mb-2">
+                        <p className="text-gray-600 text-sm">↪ ตอบโดย: {reply.postedByUser?.name || reply.postedByPersonnel?.name || "ผู้ใช้"}</p>
+                        <p className="text-gray-700 text-sm">{reply.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -95,21 +153,14 @@ const RespondBlog = () => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-8">
+      <form onSubmit={handleCommentSubmit}>
         <textarea
-          name="reply"
-          rows="4"
-          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="พิมพ์ความคิดเห็นของคุณที่นี่..."
+          className="w-full p-3 border rounded-lg"
+          placeholder="พิมพ์ความคิดเห็น..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
-        >
-          ส่งความคิดเห็น
-        </button>
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">ส่งความคิดเห็น</button>
       </form>
     </div>
   );

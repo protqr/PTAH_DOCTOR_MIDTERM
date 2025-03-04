@@ -1,7 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import Post from "../models/PostModel.js";
+import { verifyJWT } from '../utils/tokenUtils.js'; // ฟังก์ชันตรวจสอบ JWT token
+import { PREFIXDOCTOR } from "../utils/constants.js"; // นำเข้า PREFIXDOCTOR
+import Doctor from "../models/DoctorModel.js"; // Import Doctor model
 
+
+
+// Get all posts
 export const getAllPost = async (req, res) => {
   const { search, sort, isDeleted } = req.query;
 
@@ -31,19 +37,56 @@ export const getAllPost = async (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const posts = await Post.find(queryObject)
-    .populate("postedBy", "name")
-    .sort(sortKey)
-    .skip(skip)
-    .limit(limit)
-    .lean();
+  try {
+    // ดึงโพสต์ทั้งหมดพร้อม populate ชื่อผู้โพสต์
+    const posts = await Post.find(queryObject)
+      .populate("postedBy", "name") // populate ชื่อผู้โพสต์โพสต์
+      .populate("comments.postedByUser", "name") // populate ชื่อผู้โพสต์ความคิดเห็น (ถ้าเป็น Patient)
+      .populate("comments.postedByPersonnel", "name") // populate ชื่อผู้โพสต์ความคิดเห็น (ถ้าเป็น Doctor)
+      .populate("comments.replies.postedByUser", "name") // populate ชื่อผู้ตอบกลับ (ถ้าเป็น Patient)
+      .populate("comments.replies.postedByPersonnel", "name") // populate ชื่อผู้ตอบกลับ (ถ้าเป็น Doctor)
+      .sort(sortKey)
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-  const totalPosts = await Post.countDocuments(queryObject);
-  const numOfPages = Math.ceil(totalPosts / limit);
+    const totalPosts = await Post.countDocuments(queryObject);
+    const numOfPages = Math.ceil(totalPosts / limit);
 
-  res.status(StatusCodes.OK).json({ totalPosts, numOfPages, currentPage: page, posts });
+    res.status(StatusCodes.OK).json({ totalPosts, numOfPages, currentPage: page, posts });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+  }
 };
 
+// Get a single post
+export const getPost = async (req, res) => {
+  try {
+    const postId = req.params._id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid ID format" });
+    }
+
+    // ค้นหาโพสต์ตาม ID และ populate ชื่อผู้โพสต์ความคิดเห็นและผู้ตอบกลับ
+    const post = await Post.findById(postId)
+      .populate("postedBy", "name") // populate ชื่อผู้โพสต์โพสต์
+      .populate("comments.postedByUser", "name") // populate ชื่อผู้โพสต์ความคิดเห็น (ถ้าเป็น Patient)
+      .populate("comments.postedByPersonnel", "name") // populate ชื่อผู้โพสต์ความคิดเห็น (ถ้าเป็น Doctor)
+      .populate("comments.replies.postedByUser", "name") // populate ชื่อผู้ตอบกลับ (ถ้าเป็น Patient)
+      .populate("comments.replies.postedByPersonnel", "name"); // populate ชื่อผู้ตอบกลับ (ถ้าเป็น Doctor)
+
+    if (!post) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: `No post with id: ${postId}` });
+    }
+
+    res.status(StatusCodes.OK).json({ success: true, post });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+  }
+};
+
+// Create a new post
 export const createPost = async (req, res) => {
   const { title, content, tag, postedBy } = req.body;
 
@@ -59,67 +102,145 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const getPost = async (req, res) => {
+
+// Add a comment to a post
+
+
+// Add a comment to a post
+export const addComment = async (req, res) => {
+  const { comment } = req.body;
+  const { _id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "โพสต์ไม่ถูกต้อง" });
+  }
+
+  if (!comment || comment.trim() === "" || comment === ".") {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "ต้องใส่ข้อความความคิดเห็นที่ถูกต้อง" });
+  }
+
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Authentication token is required" });
+  }
+
   try {
-    const postId = req.params._id;
+    const decoded = verifyJWT(token);  // ตรวจสอบ token ว่า valid หรือไม่
+    console.log("Decoded Token:", decoded);  // ดูว่า decoded มีค่าอย่างไร
+    console.log("User ID from decoded token:", decoded?.userId, "Doctor ID:", decoded?.doctorId);  // ตรวจสอบค่าของ userId และ doctorId
 
-    if (!mongoose.Types.ObjectId.isValid(postId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid ID format" });
+    let userId = decoded?.userId || decoded?.doctorId;
+    let role = decoded?.role;
+
+    // ตรวจสอบว่า decoded มีข้อมูลตามที่คาดหวังหรือไม่
+    if (!userId || !role) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Role or User ID is missing in token" });
     }
 
-    const post = await Post.findById(postId).populate("comments.postedBy", "name");
+    // ตรวจสอบ role ว่าถ้าเป็นคำนำหน้าหมอให้ปรับเป็น "doctor"
+    if (Object.values(PREFIXDOCTOR).includes(role)) {
+      role = "doctor";  // ถ้า role เป็นคำนำหน้าหมอให้ตั้งเป็น "doctor"
+    } else if (role === "ผู้ป่วย") {
+      role = "patient";
+    }
 
+    console.log("Updated Role:", role); // เพิ่ม log ตรวจสอบค่าของ role
+
+    const post = await Post.findById(_id);
     if (!post) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: `No post with id: ${postId}` });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "ไม่พบโพสต์นี้" });
     }
 
-    res.status(StatusCodes.OK).json({ success: true, post });
+    let newComment = {
+      text: comment,
+      postedByPersonnel: role === "doctor" ? userId : null,
+      postedByUser: role === "patient" ? userId : null,
+    };
+
+    console.log("New Comment before save:", newComment);  // ตรวจสอบค่าของ newComment
+
+    post.comments.push(newComment);
+    await post.save();
+
+    const updatedPost = await Post.findById(_id)
+      .populate("comments.postedByPersonnel", "name")
+      .populate("comments.postedByUser", "name");
+
+    console.log("Updated Post after adding comment:", updatedPost);  // ดูค่าโพสต์ที่อัปเดต
+
+    res.status(StatusCodes.OK).json({ success: true, post: updatedPost });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+    console.error("Error adding comment:", error.message);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
 };
 
 
 
 
+export const addReply = async (req, res) => {
+  const { replyText } = req.body;
+  const { postId, commentId } = req.params;
 
-export const addComment = async (req, res) => {
-  const { comment } = req.body;
-  const { _id } = req.params;
-
-  // ตรวจสอบว่า ID ของโพสต์ถูกต้อง
-  if (!mongoose.Types.ObjectId.isValid(_id)) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid post ID" });
+  // ตรวจสอบความถูกต้องของ postId และ commentId
+  if (!mongoose.Types.ObjectId.isValid(postId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "โพสต์หรือความคิดเห็นไม่ถูกต้อง" });
   }
 
-  // ตรวจสอบว่าเนื้อหาความคิดเห็นไม่ว่างเปล่า
-  if (!comment || comment.trim() === "") {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Comment text is required" });
+  // ตรวจสอบข้อความตอบกลับ
+  if (!replyText || replyText.trim() === "") {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "ต้องใส่ข้อความการตอบกลับ" });
   }
 
   try {
-    const post = await Post.findById(_id);
+    // หาโพสต์
+    const post = await Post.findById(postId);
     if (!post) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Post not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "ไม่พบโพสต์นี้" });
     }
 
-    const userId = req.user?._id || new mongoose.Types.ObjectId(); // ใช้ ObjectId แบบใหม่หากไม่มี user
-    const refModel = req.user?.role === "MPersonnel" ? "MPersonnel" : "User"; // ระบุโมเดล
+    // หาความคิดเห็นที่ต้องการตอบกลับ
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "ไม่พบความคิดเห็นนี้" });
+    }
 
-    // เพิ่มความคิดเห็นใหม่
-    post.comments.push({
-      text: comment,
-      postedBy: userId,
-      refModel: refModel,
-    });
+    // ตรวจสอบสิทธิ์: ตรวจสอบว่า userId ใน token กับข้อมูลในฐานข้อมูลตรงกันหรือไม่
+    if (!req.user || (!req.user.userId && !req.user.doctorId)) {
+      return res.status(StatusCodes.FORBIDDEN).json({ message: "คุณไม่มีสิทธิ์ในการตอบกลับ" });
+    }
 
+    // ตรวจสอบว่าเป็นแพทย์หรือผู้ป่วย
+    const replyData = {
+      text: replyText,
+    };
+
+    // ถ้าเป็นแพทย์
+    if (req.user.doctorId) {
+      replyData.postedByPersonnel = req.user.doctorId; // ใช้ doctorId สำหรับแพทย์
+    }
+
+    // ถ้าเป็นผู้ป่วย
+    if (req.user.userId) {
+      replyData.postedByUser = req.user.userId; // ใช้ userId สำหรับผู้ป่วย
+    }
+
+    // เพิ่มคำตอบในความคิดเห็น
+    comment.replies.push(replyData);
+
+    // บันทึกโพสต์
     await post.save();
 
-    // โหลดโพสต์ใหม่พร้อมข้อมูลผู้โพสต์ในความคิดเห็น
-    const updatedPost = await Post.findById(_id).populate("comments.postedBy", "name");
+    // โหลดโพสต์พร้อมกับการตอบกลับและผู้ตอบกลับ
+    const updatedPost = await Post.findById(postId)
+      .populate("comments.replies.postedByUser", "name")  // populate ชื่อผู้ตอบกลับ (Patient)
+      .populate("comments.replies.postedByPersonnel", "name"); // populate ชื่อผู้ตอบกลับ (Doctor)
+
+    // ส่งข้อมูลกลับ
     res.status(StatusCodes.OK).json({ success: true, post: updatedPost });
   } catch (error) {
-    console.error("Error adding comment:", error.message);
+    console.error("Error adding reply:", error.message);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
 };
