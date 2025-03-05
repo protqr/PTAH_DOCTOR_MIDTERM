@@ -7,6 +7,7 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
+  getCurrentDoctor
 } from "../controllers/DoctorController.js";
 import {
   validateDoctorInput,
@@ -17,6 +18,7 @@ import {
 // router.post('/',createDoctor)
 
 router.route("/").get(getAllDoctor).post(validateDoctorInput, createDoctor);
+router.get("/me", getCurrentDoctor);
 
 router
   .route("/:_id")

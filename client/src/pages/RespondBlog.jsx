@@ -13,7 +13,8 @@ const RespondBlog = () => {
   const [newComment, setNewComment] = useState("");
   const [newReply, setNewReply] = useState(""); // state for new replies
   const [replyTo, setReplyTo] = useState(null); // track which comment you're replying to
-
+  
+  
   if (!post) {
     return <p>ไม่พบข้อมูลกระทู้</p>;
   }
@@ -46,11 +47,11 @@ const RespondBlog = () => {
     }
 
     try {
-      const { data } = await axios.put(`/api/v1/posts/comment/post/${post._id}`, {
-        comment: newComment,
-      });
+      const { data } = await axios.put( `/api/v1/posts/comment/post/${post._id}`,{
+          comment: newComment,
+        });
       if (data.success) {
-        setNewComment("");  // รีเซ็ตฟอร์ม
+        setNewComment(""); // รีเซ็ตฟอร์ม
         toast.success("เพิ่มความคิดเห็นสำเร็จ");
         setComments(data.post.comments);
         socket.emit("comment", data.post.comments);
@@ -66,21 +67,17 @@ const RespondBlog = () => {
       toast.error("กรุณาใส่คำตอบ");
       return;
     }
-  
+
     try {
       const { data } = await axios.put(
         `/api/v1/posts/comment/reply/${post._id}/${commentId}`,
         {
-          replyText: newReply,  // ส่ง replyText แทน reply
+          replyText: newReply, // ส่ง replyText แทน reply
         },
-        {
-          headers: {
-            Authorization: `Bearer ${userToken}`  // ส่ง token ใน headers สำหรับการตรวจสอบการเข้าสู่ระบบ
-          }
-        }
+
       );
       if (data.success) {
-        setNewReply("");  // รีเซ็ตฟอร์มคำตอบ
+        setNewReply(""); // รีเซ็ตฟอร์มคำตอบ
         setReplyTo(null); // ปิดการตอบกลับ
         toast.success("ตอบกลับความคิดเห็นสำเร็จ");
         setComments(data.post.comments);
@@ -90,7 +87,6 @@ const RespondBlog = () => {
       toast.error("เกิดข้อผิดพลาดในการตอบกลับความคิดเห็น");
     }
   };
-  
 
   return (
     <div className="max-w-4xl mx-auto my-8">
@@ -99,7 +95,14 @@ const RespondBlog = () => {
         <p className="text-gray-700 mb-6 text-justify">{post.content}</p>
         <p className="text-blue-700 mb-6">#{post.tag}</p>
         <div className="text-sm text-gray-500 mb-2 flex items-center">
-          <span className="font-semibold">สร้างโดย : {post.postedBy?.name || "ผู้โพสต์ไม่ทราบ"}</span>
+          <span className="font-semibold">
+            สร้างโดย :{" "}
+            {post.postedBy
+              ? post.postedBy.nametitle
+                ? `${post.postedBy.nametitle} ${post.postedBy.name} ${post.postedBy.surname}`
+                : `${post.postedBy.name} ${post.postedBy.surname}`
+              : "ผู้โพสต์ไม่ทราบ"}
+          </span>
         </div>
       </div>
 
@@ -108,8 +111,19 @@ const RespondBlog = () => {
         {comments.length > 0 ? (
           <div className="space-y-4">
             {comments.map((comment) => (
-              <div key={comment._id} className="p-4 border rounded-lg bg-gray-50">
-                <p className="font-medium text-gray-600">ตอบกลับโดย: {comment.postedByUser?.name || comment.postedByPersonnel?.name || "ผู้ใช้"}</p>
+              <div
+                key={comment._id}
+                className="p-4 border rounded-lg bg-gray-50"
+              >
+                <p className="font-medium text-gray-600">
+                  ตอบกลับโดย:{" "}
+                  {comment.postedByPersonnel
+                    ? `${comment.postedByPersonnel.nametitle} ${comment.postedByPersonnel.name} ${comment.postedByPersonnel.surname}`
+                    : comment.postedByUser
+                    ? `${comment.postedByUser.name} ${comment.postedByUser.surname}`
+                    : "ผู้ใช้"}
+                </p>
+
                 <p className="text-gray-700 mt-2">{comment.text}</p>
 
                 {/* แสดงฟอร์มการตอบกลับ */}
@@ -122,7 +136,12 @@ const RespondBlog = () => {
                         value={newReply}
                         onChange={(e) => setNewReply(e.target.value)}
                       />
-                      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2">ส่งคำตอบ</button>
+                      <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2"
+                      >
+                        ส่งคำตอบ
+                      </button>
                     </form>
                   ) : (
                     <button
@@ -139,7 +158,15 @@ const RespondBlog = () => {
                   <div className="mt-4 ml-6 border-l-2 pl-4">
                     {comment.replies.map((reply) => (
                       <div key={reply._id} className="mb-2">
-                        <p className="text-gray-600 text-sm">↪ ตอบโดย: {reply.postedByUser?.name || reply.postedByPersonnel?.name || "ผู้ใช้"}</p>
+                        <p className="text-gray-600 text-sm">
+                          ↪ ตอบโดย:{" "}
+                          {reply.postedByPersonnel
+                            ? `${reply.postedByPersonnel.nametitle} ${reply.postedByPersonnel.name} ${reply.postedByPersonnel.surname}`
+                            : reply.postedByUser
+                            ? `${reply.postedByUser.name} ${reply.postedByUser.surname}`
+                            : "ผู้ใช้"}
+                        </p>
+
                         <p className="text-gray-700 text-sm">{reply.text}</p>
                       </div>
                     ))}
@@ -160,7 +187,12 @@ const RespondBlog = () => {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">ส่งความคิดเห็น</button>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+        >
+          ส่งความคิดเห็น
+        </button>
       </form>
     </div>
   );

@@ -115,3 +115,19 @@ export const deleteDoctor = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
   }
 };
+
+export const getCurrentDoctor = async (req, res) => {
+  try {
+    const doctorId = req.user.doctorId;
+    if (!doctorId) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not a doctor" });
+    }
+    const doctor = await Doctor.findById(doctorId).select("nametitle name surname");
+    if (!doctor) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Doctor not found" });
+    }
+    res.status(StatusCodes.OK).json({ doctor });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
+  }
+};

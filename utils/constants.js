@@ -20,6 +20,8 @@ export const TYPESTATUS = {
 export const PREFIXDOCTOR = {
   PREFIX_MD1: "นพ.",
   PREFIX_MD2: "พญ.",
+  PREFIX_MD3: "แพทย์หญิง",
+  PREFIX_MD4: "นายแพทย์"
 };
 
 export const GENDER = {

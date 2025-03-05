@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 
 export const loader = async () => {
   try {
-    const { data } = await customFetch("/doctors");
-    return data;
+    const { data } = await customFetch("/doctors/me");
+    return data.doctor;
   } catch (error) {
     return redirect("/");
   }
@@ -24,7 +24,7 @@ const DashboardLayout = ({ isDarkThemeEnabled }) => {
   const data = useLoaderData();
   console.log(data);
   // temp
-  const user = { name: "เสกสรรค์" };
+  const user = data;
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(checkDefaultTheme());
 
