@@ -71,7 +71,7 @@ const StatsContainer = ({ defaultStats }) => {
         })}
       </Wrapper>
       <div className="mt-12"></div>
-      <StatsSubject>ประเมินผู้ป่วย</StatsSubject>
+      {/* <StatsSubject>ประเมินผู้ป่วย</StatsSubject> */}
       {/* <div className="mb-20 p-8 flex shadow-2xl rounded-2xl justify-center sm:justify-center w-full max-w-screen-lg mx-auto">
           <div className="flex flex-col space-y-4">
             <p>เลือกวันที่</p>
