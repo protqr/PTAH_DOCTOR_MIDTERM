@@ -4,6 +4,7 @@ import Doctor from "../models/DoctorModel.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { UnauthenticatedError } from "../errors/customError.js";
 import { createJWT } from "../utils/tokenUtils.js";
+import { sendEmail } from "../services/mailer.js"; // Correct the import statement
 
 export const register = async (req, res) => {
   const hashedPassword = await hashPassword(req.body.password);
@@ -72,4 +73,32 @@ export const logout = (req, res) => {
     expires: new Date(Date.now()),
   });
   res.status(StatusCodes.OK).json({ msg: "doctor logged out!" });
+};
+
+// รีเซ็ตรหัสผ่านโดยการส่งลิงก์รีเซ็นไปทาง Email
+
+// รีเซ็ตรหัสผ่านโดยการส่งลิงก์รีเซ็นไปทาง Email
+export const resetPassword = async (req, res) => {
+  const { email } = req.body;
+  const doctor = await Doctor.findOne({ email });
+
+  if (!doctor) {
+    throw new UnauthenticatedError("ไม่พบอีเมลนี้ในระบบ");
+  }
+
+  // Generate a reset token (you can use JWT or any other method)
+  const resetToken = createJWT({ doctorId: doctor._id, role: doctor.nametitle });
+
+  // Send reset email
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+  await sendEmail(
+    "pharadonsiriforwork@gmail.com", 
+    "การรีเซ็ตรหัสผ่าน", 
+    `คลิกที่ลิงค์เพื่อรีเซ็ตรหัสผ่านของคุณ: ${resetLink}`, 
+    `<p>คลิกที่ลิงค์เพื่อรีเซ็ตรหัสผ่านของคุณ: <a href="${resetLink}">${resetLink}</a></p>`
+  );
+  
+  // await sendEmail(email, "Password Reset", `Click the link to reset your password: ${resetLink}`, `<p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`);
+
+  res.status(StatusCodes.OK).json({ msg: "Password reset email sent" });
 };

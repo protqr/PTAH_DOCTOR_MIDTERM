@@ -191,3 +191,8 @@ export const validateLoginInput = withValidationErrors([
 export const validateUpdateUserInput = withValidationErrors([
   // โค้ด validateUpdateUserInput นี่เราไม่ได้แก้ไขใด ๆ
 ]);
+
+export const validateResetPasswordUserInput = withValidationErrors([
+  // โค้ด validateUpdateUserInput นี่เราไม่ได้แก้ไขใด ๆ
+
+]);
