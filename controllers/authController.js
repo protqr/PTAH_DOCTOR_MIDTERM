@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import Doctor from "../models/DoctorModel.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { UnauthenticatedError } from "../errors/customError.js";
-import { createJWT } from "../utils/tokenUtils.js";
+import { createJWT , verifyJWT } from "../utils/tokenUtils.js";
 import { sendEmail } from "../services/mailer.js"; // Correct the import statement
 
 export const register = async (req, res) => {
@@ -101,4 +101,28 @@ export const resetPassword = async (req, res) => {
   // await sendEmail(email, "Password Reset", `Click the link to reset your password: ${resetLink}`, `<p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`);
 
   res.status(StatusCodes.OK).json({ msg: "Password reset email sent" });
+};
+
+
+// ฟังก์ชันสำหรับการตั้งรหัสผ่านใหม่
+export const setNewPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const payload = verifyJWT(token);
+    const doctor = await Doctor.findById(payload.doctorId);
+
+    if (!doctor) {
+      throw new UnauthenticatedError("ไม่พบผู้ใช้");
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    doctor.password = hashedPassword;
+    await doctor.save();
+
+    res.status(StatusCodes.OK).json({ msg: "Password has been reset" });
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.UNAUTHORIZED).json({ msg: "Invalid or expired token" });
+  }
 };

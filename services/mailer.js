@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   service: 'gmail', // หรือใช้บริการอื่น ๆ เช่น 'smtp.mailtrap.io'
   auth: {
-    user: "adsadfs@gmail.com",
+    user: "ponduuu123@gmail.com",
     pass: "jpzkzwxyaynydcfe"
   },
 });

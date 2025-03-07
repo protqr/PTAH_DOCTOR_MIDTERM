@@ -179,6 +179,12 @@ export const validateIdParam4 = withValidationErrors([
   }),
 ]);
 
+export const validateUpdateUserInput = withValidationErrors([
+  // body("email").isEmail().withMessage("โปรดกรอกอีเมลที่ถูกต้อง"),
+  // body("name").notEmpty().withMessage("โปรดกรอกชื่อ"),
+  // body("surname").notEmpty().withMessage("โปรดกรอกนามสกุล"),
+  // body("tel").notEmpty().withMessage("โปรดกรอกเบอร์โทรศัพท์"),
+]);
 
 export const validateRegisterInput = withValidationErrors([
   // โค้ด validateRegisterInput นี่เราไม่ได้แก้ไขใด ๆ
@@ -188,11 +194,11 @@ export const validateLoginInput = withValidationErrors([
   // โค้ด validateLoginInput นี่เราไม่ได้แก้ไขใด ๆ
 ]);
 
-export const validateUpdateUserInput = withValidationErrors([
-  // โค้ด validateUpdateUserInput นี่เราไม่ได้แก้ไขใด ๆ
+export const validateResetPasswordUserInput = withValidationErrors([
+  // body("email").isEmail().withMessage("โปรดกรอกอีเมลที่ถูกต้อง"),
 ]);
 
-export const validateResetPasswordUserInput = withValidationErrors([
-  // โค้ด validateUpdateUserInput นี่เราไม่ได้แก้ไขใด ๆ
-
+export const validateSetNewPasswordInput = withValidationErrors([
+  body("token").notEmpty().withMessage("โปรดใส่โทเค็น"),
+  body("newPassword").isLength({ min: 6 }).withMessage("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"),
 ]);
