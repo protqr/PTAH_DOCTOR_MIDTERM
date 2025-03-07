@@ -26,9 +26,8 @@ const CalendarCell = ({ day, status, star, selectedYear, selectedMonth, userId }
 
   return (
     <div
-      className={`flex justify-center items-center h-12 rounded-md cursor-pointer ${
-        status && !isFutureDate ? "hover:bg-gray-100" : "cursor-not-allowed"
-      }`}
+      className={`flex justify-center items-center h-12 rounded-md cursor-pointer ${status && !isFutureDate ? "hover:bg-gray-100" : "cursor-not-allowed"
+        }`}
       onClick={handleClick}
     >
       <div className="relative flex flex-col items-center justify-center min-h-[60px]">
@@ -65,8 +64,9 @@ const PatientCalendar = ({ calendarData, userId }) => {
     const starData = {};
 
     calendarData.forEach(({ created_at, feedback_status, feedback_date, star }) => {
-      console.log("Processing Date:", created_at, "Feedback Date:", feedback_date, "Star:", star);
-      const dateKey = created_at.split("T")[0];
+      if (!created_at) return;
+
+      const dateKey = created_at?.split("T")[0] || "unknown_date";
 
       statusData[dateKey] = feedback_status !== undefined ? feedback_status : "wait";
 
@@ -74,6 +74,7 @@ const PatientCalendar = ({ calendarData, userId }) => {
         starData[dateKey] = true;
       }
     });
+
 
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
     for (let i = 1; i <= daysInMonth; i++) {

@@ -28,13 +28,12 @@ const PostureCard = ({ name, answers, suggestion }) => {
             <li key={i} className="flex justify-between mb-7">
               <span>{answer.name || "ไม่มีข้อมูล"}</span>
               <span
-                className={`${
-                  answer.result === "ง่าย"
-                    ? "text-green-500"
-                    : answer.result === "ปานกลาง"
+                className={`${answer.result === "ง่าย"
+                  ? "text-green-500"
+                  : answer.result === "ปานกลาง"
                     ? "text-yellow-500"
                     : "text-red-500"
-                }`}
+                  }`}
               >
                 {answer.result || "ไม่มีผลลัพธ์"}
               </span>
@@ -51,6 +50,7 @@ const PostureCard = ({ name, answers, suggestion }) => {
     </div>
   );
 };
+
 const EvaluatePatient = () => {
   const { date, _id } = useParams();
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const EvaluatePatient = () => {
       setDataList(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setDataList([]); // ป้องกันค่า undefined
+      setDataList([]);
     }
   };
 
@@ -152,25 +152,19 @@ const EvaluatePatient = () => {
         </div>
 
         <div className="w-full h-full flex flex-col border-2 p-8 rounded-lg space-y-8 shadow-lg">
-          {dataList && Array.isArray(dataList) && dataList.length > 0 ? (
-            dataList
-              .filter(
-                (o) =>
-                  o.created_at &&
-                  new Date(o.created_at).toISOString().split("T")[0] === date
-              )
-              .map((val, index) => (
-                <PostureCard
-                  key={index}
-                  name={val.name || "-"}
-                  answers={Array.isArray(val.answers) ? val.answers : []}
-                  suggestion={
-                    val.suggestion?.trim() ? val.suggestion : "ไม่มีข้อความ"
-                  }
-                />
-              ))
+          {dataList && Array.isArray(dataList) && dataList.filter((o) => o.created_at && new Date(o.created_at).toISOString().split("T")[0] === date).length > 0 ? (
+            dataList.filter((o) => o.created_at && new Date(o.created_at).toISOString().split("T")[0] === date).map((val, index) => (
+              <PostureCard
+                key={index}
+                name={val.name || "-"}
+                answers={Array.isArray(val.answers) ? val.answers : []}
+                suggestion={
+                  val.suggestion?.trim() ? val.suggestion : "ไม่มีข้อความ"
+                }
+              />
+            ))
           ) : (
-            <p className="text-gray-400 text-center">ไม่มีข้อมูล</p>
+            <p className="text-gray-400 text-center">ไม่พบผลประเมิน</p>
           )}
         </div>
 
@@ -187,11 +181,10 @@ const EvaluatePatient = () => {
             <p className="font-regular mt-5">
               ผลการประเมิน :
               <span
-                className={`ml-2 ${
-                  feedbackData.feedback_type === "ทำได้ดี"
-                    ? "text-[#1DD047]"
-                    : "text-[#ff9d0a]"
-                }`}
+                className={`ml-2 ${feedbackData.feedback_type === "ทำได้ดี"
+                  ? "text-[#1DD047]"
+                  : "text-[#ff9d0a]"
+                  }`}
               >
                 {feedbackData.feedback_type?.trim()
                   ? feedbackData.feedback_type
