@@ -73,10 +73,10 @@ export const getAllPatients = async (req, res) => {
   if (userStatus === "คนไข้ที่ยังไม่ได้ประเมินวันนี้") {
     try {
       const evaluationsToday = await Evaluation.find({
-        evaluation_date: { $eq: day().format("YYYY-MM-DD") }
-      }).select("user_id");
+        created_at: { $gte: day().startOf("day").toDate(), $lt: day().endOf("day").toDate() }
+      }).select("userId");
 
-      const userIdsEvaluatedToday = evaluationsToday.map(e => e.user_id.toString());
+      const userIdsEvaluatedToday = evaluationsToday.map(e => e.userId.toString());
 
       const feedbacks = await FeedbacksModel.find({
         user_id: { $in: userIdsEvaluatedToday },
@@ -237,6 +237,7 @@ export const deletePatient = async (req, res) => {
 export const showStats = async (req, res) => {
   try {
     let stats = await Patient.aggregate([
+      { $match: { physicalTherapy: true } },
       { $group: { _id: "$userStatus", count: { $sum: 1 } } },
     ]);
 
@@ -246,19 +247,26 @@ export const showStats = async (req, res) => {
       return acc;
     }, {});
 
-    const patientsWithEvaluation = await Evaluation.distinct("userId");
+    const patientsWithEvaluation = await Evaluation.distinct("userId", {
+      physicalTherapy: true,
+    });
 
     const totalphysicalTherapyPatients = await Patient.countDocuments({
       _id: { $in: patientsWithEvaluation },
+      physicalTherapy: true,
       isDeleted: { $nin: [true] },
     });
-    
+
     const totalNonPhysicalTherapyPatients = await Patient.countDocuments({
       _id: { $nin: patientsWithEvaluation },
+      physicalTherapy: true,
       isDeleted: { $nin: [true] },
     });
-    
-    const totalPatients = totalphysicalTherapyPatients + totalNonPhysicalTherapyPatients;
+
+    const totalPatients = await Patient.countDocuments({
+      physicalTherapy: true,
+      isDeleted: { $nin: [true] },
+    });
 
     const defaultStats = {
       กำลังรักษา: stats.กำลังรักษาอยู่ || 0,
@@ -268,10 +276,11 @@ export const showStats = async (req, res) => {
       ผู้ป่วยที่ยังไม่ทำกายภาพบำบัด: totalNonPhysicalTherapyPatients || 0,
     };
 
-    let monthlyApplications = await Evaluation.aggregate([
+    let monthlyApplications = await Patient.aggregate([
+      { $match: { physicalTherapy: true } }, // ✅ กรองเฉพาะคนที่ทำกายภาพบำบัด
       {
         $group: {
-          _id: { year: { $year: "$created_at" }, month: { $month: "$created_at" } },
+          _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
           count: { $sum: 1 },
         },
       },
@@ -287,7 +296,7 @@ export const showStats = async (req, res) => {
       .reverse();
 
     let monthlyApplications2 = await Patient.aggregate([
-      { $match: { createdAt: { $exists: true } } },
+      { $match: { physicalTherapy: true, createdAt: { $exists: true } } },
       {
         $group: {
           _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
@@ -302,8 +311,7 @@ export const showStats = async (req, res) => {
       .map(({ _id: { year, month }, count }) => ({
         date: day().month(month - 1).year(year).format("MMM YYYY"),
         count,
-      }))
-      .reverse();
+      })).reverse();
 
     res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications, monthlyApplications2 });
   } catch (error) {
@@ -311,3 +319,4 @@ export const showStats = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ msg: "เกิดข้อผิดพลาดในการดึงข้อมูล" });
   }
 };
+
